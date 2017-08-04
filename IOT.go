@@ -20,6 +20,16 @@ type Contract struct {
 	ContractNo string `json:"contractNo"`
 }
 
+type EVENTJSON struct {
+	ContractNo  string `json:"contractNo"`
+	Iothub      string `json:"iothub"`
+	Deviceid    string `json:"deviceid"`
+	Time        string `json:"time"`
+	AmbientTemp string `json:"ambientTemp"`
+	ObjectTemp  string `json:"objectTemp"`
+	Email 	    string `json:"Email"`
+}	
+
 type IOTJSON struct {
 	Iothub      string `json:"iothub"`
 	Deviceid    string `json:"deviceid"`
@@ -135,8 +145,25 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("GetContractNo : ", b1)
 
+	e1, err := t.drr.GetEmailId(stub, []string{deviceid})
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetEmailId", err)
 	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Just after GetEmailId")
+	
+	if e1 == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Before e1 = NIL")
+		return nil, errors.New("Email ID Not Found")
+	}
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetEmailId : ", e1)
+		
 	ContractNo := contractid.ContractNo	
+	Email := string(e1)
 	iothub := args[0]
 	ambientTemp := args[2]
 	objectTemp := args[3]
@@ -237,7 +264,37 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
 	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
-		
+	
+	var eventJSON EVENTJSON
+	
+	eventJSON.ContractNo = ContractNo
+	eventJSON.Iothub = iothub
+	eventJSON.Deviceid = deviceid
+	eventJSON.Time = time
+	eventJSON.AmbientTemp = ambientTemp
+	eventJSON.ObjectTemp = objectTemp
+	eventJSON.Email = Email
+	
+	myLoggerIOT.Debugf("eventJSON", eventJSON)
+	jsonEvent, err := json.Marshal(eventJSON)
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error in Marshalling : ",err)
+	
+	if err != nil {
+		return nil, err
+	}
+	myLoggerIOT.Debugf("Event Data : ", string(jsonEvent)) 
+	
+	err = stub.SetEvent("IOTSubmitEvent", jsonEvent)
+	if err != nil {
+		return nil, err
+	}
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("After Set Event: ", clupdate)
+	myLoggerIOT.Debugf("Error After Set Event: ", clErr)
+	
 	return nil, err
 }
 
