@@ -224,3 +224,49 @@ func (t *DRR) GetContractNo(stub shim.ChaincodeStubInterface, args []string) ([]
 	return []byte(row.Columns[2].GetString_()), nil
     
 }
+
+func (t *DRR) GetEmailId(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+    
+    	myLogger.Debugf("-------------------------------------------------------------------")
+	myLogger.Debugf("Inside GetEmailId")
+	myLogger.Debugf("args : ", args)
+
+    if len(args) != 1 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 1.")
+	}
+	
+	myLogger.Debugf("-------------------------------------------------------------------")
+	myLogger.Debugf("No of Arguments Passed")
+	
+	DeviceID := args[0]
+    
+    var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: "DRR"}}
+	columns = append(columns, col1)
+	col2 := shim.Column{Value: &shim.Column_String_{String_: DeviceID}}
+	columns = append(columns, col2)
+    	
+	myLogger.Debugf("-------------------------------------------------------------------")
+	myLogger.Debugf("Columns fetched!", columns)
+	
+    row, err := stub.GetRow("DeviceRegister", columns)
+	if err != nil {
+		return nil, fmt.Errorf("Error: Failed retrieving document with DeviceID %s. Error %s", DeviceID, err.Error())
+	}
+
+	myLogger.Debugf("-------------------------------------------------------------------")
+	myLogger.Debugf("Rows Fetched!",row)
+	myLogger.Debugf("Error in Rows Fetched!",err)
+	
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+		myLogger.Debugf("Device ID Does not Exist!",len(row.Columns))
+		return nil, nil		
+	}
+
+	myLogger.Debugf("-------------------------------------------------------------------")
+	myLogger.Debugf("Before return, returning :", []byte(row.Columns[3].GetString_()))
+	
+	return []byte(row.Columns[3].GetString_()), nil
+    
+}
