@@ -182,14 +182,65 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	light := args[16]
 	time := args[17]
 	
+	LatestLocation, err := cl.GetCargoLocation(ContractNo)
+	
+	if LatestLocation == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		return nil, errors.New("CargoLocation Not Found!")
+	}
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetCargoLocation : " LatestLocation)
+	
+	var CargoLocation string
+	
+	var iotJSON IOTJSON
+	
+	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
+
+	if !validIOTHub[iothub] {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Cargo Location Not Found!")
+		return nil, errors.New("Cargo Location Not Found!")	
+	} 
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
+	
+	
+	
+	if iothub == "ipad01" {
+		CargoLocation = "Ex FWD"
+	} else if iothub == "ipad02" {
+		CargoLocation = "Ex Ship"
+	} else if iothub == "ipad03" {
+		CargoLocation = "Shipping"
+	}
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
+
 	ContractNoLocation := ContractNo + iothub
 	
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
-	// Insert a row
-	ok, err := stub.InsertRow("IOTTable", shim.Row{
-		Columns: []*shim.Column{
+	
+	if( CargoLocation != LatestLocation ){
+		
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("New Location Found!")
+		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
+		
+		iotJSON = iot.GetIOTdata(ContractNo, iothub)
+		if( iotJSON.iothub == nil && iotJSON.deviceid == nil){
+			
+			// Insert a row
+			ok, err := stub.InsertRow("IOTTable", shim.Row{
+			Columns: []*shim.Column{
 			&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
 			&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
 			&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
@@ -212,7 +263,8 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			&shim.Column{Value: &shim.Column_String_{String_: light}},
 			&shim.Column{Value: &shim.Column_String_{String_: time}},
 		}})
-
+	}
+		
 	if !ok && err == nil {
 		return nil, errors.New("Document already exists in IOTTable.")
 	}
@@ -222,30 +274,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	
 	//function to get cargolocation based on iothub
 
-	var CargoLocation string
-	
-	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
-
-	if !validIOTHub[iothub] {
-		myLoggerIOT.Debugf("-------------------------------------------------------------------")
-		myLoggerIOT.Debugf("Cargo Location Not Found!")
-		return nil, errors.New("Cargo Location Not Found!")	
-	} 
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
-	
-	if iothub == "ipad01" {
-		CargoLocation = "Ex FWD"
-	} else if iothub == "ipad02" {
-		CargoLocation = "Ex Ship"
-	} else if iothub == "ipad03" {
-		CargoLocation = "Shipping"
-	}
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
-	
+		
 	toSend := make([]string, 3)
 	toSend[0] = string(ContractNo)
 	toSend[1] = string(CargoLocation)
@@ -313,7 +342,7 @@ func (t *IOT) GetIOTdata(stub shim.ChaincodeStubInterface, args []string) ([]byt
 	}
 	ContractNo := args[0]
 	Location := args[1]
-	myLoggerIOT.Debugf("Contract number : ", ContractNo)
+	myLoggerIOT.Debugf("Contract Number : ", ContractNo)
 	myLoggerIOT.Debugf("Location : ", Location)
 	ContractNoLocation := ContractNo + Location
 	
