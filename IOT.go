@@ -208,8 +208,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	}
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
-
+	myLoggerIOT.Debugf("Cargo Location Found! ",iothub)
 
 
 	if iothub == "ipad01" {
@@ -260,7 +259,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			&shim.Column{Value: &shim.Column_String_{String_: magY}},
 			&shim.Column{Value: &shim.Column_String_{String_: magZ}},
 			&shim.Column{Value: &shim.Column_String_{String_: light}},
-			&shim.Column{Value: &shim.Column_String_{String_: time}},
+			&shim.Column{Value: &shim.Column_String_{String_: time}}
 		}})
 	}
 	else{
@@ -287,7 +286,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			&shim.Column{Value: &shim.Column_String_{String_: magY}},
 			&shim.Column{Value: &shim.Column_String_{String_: magZ}},
 			&shim.Column{Value: &shim.Column_String_{String_: light}},
-			&shim.Column{Value: &shim.Column_String_{String_: time}},
+			&shim.Column{Value: &shim.Column_String_{String_: time}}
 		}})
 	}
 }
