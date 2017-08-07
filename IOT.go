@@ -193,7 +193,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
 	
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("GetCargoLocation : " LatestLocation)
+	myLoggerIOT.Debugf("GetCargoLocation : ", LatestLocation)
 	
 	var CargoLocation string
 	
