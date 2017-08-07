@@ -234,8 +234,22 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		myLoggerIOT.Debugf("New Location Found!")
 		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 
-		iotdata = t.iot.GetIOTdata(stub, []string{ContractNo, iothub})
-		if iotdata.iothub == "" && iotdata.deviceid == "" {
+		var columns []shim.Column
+		col1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
+		columns = append(columns, col1)
+		col2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
+		columns = append(columns, col2)
+
+		row, err := stub.GetRow("IOTTable", columns)
+		if err != nil {
+			return nil, errors.New("Error: Failed retrieving document!")
+		}
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Matched Row : ", len(row.Columns))
+
+		// GetRows returns empty message if key does not exist
+		if len(row.Columns) == 0 {
 			// Insert a row
 			ok, err := stub.InsertRow("IOTTable", shim.Row{
 				Columns: []*shim.Column{
