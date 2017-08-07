@@ -197,7 +197,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	
 	var CargoLocation string
 	
-	var iotJSON IOTJSON
+	var iotJSONcheck IOTJSON
 	
 	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
 
@@ -235,8 +235,8 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		myLoggerIOT.Debugf("New Location Found!")
 		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 		
-		iotJSON = iot.GetIOTdata(ContractNo, iothub)
-		if( iotJSON.iothub == nil && iotJSON.deviceid == nil){
+		iotJSONcheck = iot.GetIOTdata(ContractNo, iothub)
+		if( iotJSONcheck.iothub == nil && iotJSONcheck.deviceid == nil){
 			
 			// Insert a row
 			ok, err := stub.InsertRow("IOTTable", shim.Row{
