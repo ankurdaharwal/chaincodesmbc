@@ -290,6 +290,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			&shim.Column{Value: &shim.Column_String_{String_: time}},
 		}})
 	}
+}
 
 	if !ok && err == nil {
 		return nil, errors.New("Document already exists in IOTTable.")
