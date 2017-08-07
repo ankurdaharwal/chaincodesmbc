@@ -182,7 +182,7 @@
 			light := args[16]
 			time := args[17]
 
-			LatestLocation, err := t.cl.GetCargoLocation(ContractNo)
+			LatestLocation, err := String(t.cl.GetCargoLocation(stub, []string{ContractNo}))
 
 			if LatestLocation == nil {
 				myLoggerIOT.Debugf("-------------------------------------------------------------------")
