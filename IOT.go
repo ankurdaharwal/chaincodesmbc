@@ -231,13 +231,13 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		myLoggerIOT.Debugf("New Location Found!")
 		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 
-		var columns []shim.Column
-		col1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
-		columns = append(columns, col1)
-		col2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
-		columns = append(columns, col2)
+		var cols []shim.Column
+		column1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
+		cols = append(columns, column1)
+		column2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
+		cols = append(columns, column2)
 
-		row, err := stub.GetRow("IOTTable", columns)
+		row, err := stub.GetRow("IOTTable", cols)
 		if err != nil {
 			return nil, errors.New("Error: Failed retrieving document!")
 		}
