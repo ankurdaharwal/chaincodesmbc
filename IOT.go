@@ -235,7 +235,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		myLoggerIOT.Debugf("New Location Found!")
 		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 
-		iotJSON = GetIOTdata(ContractNo, iothub)
+		//iotJSON = GetIOTdata(ContractNo, iothub)
 		if( iotdata.iothub == "" && iotdata.deviceid == "" ){
 			// Insert a row
 			ok, err := stub.InsertRow("IOTTable", shim.Row{
