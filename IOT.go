@@ -198,8 +198,6 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 
 	var CargoLocation string
 
-	var iotdata IOTJSON
-
 	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
 
 	if !validIOTHub[iothub] {
