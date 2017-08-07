@@ -14,7 +14,6 @@ import (
 type IOT struct {
 	drr DRR
 	cl  CL
-	iot IOT
 }
 
 type Contract struct {
