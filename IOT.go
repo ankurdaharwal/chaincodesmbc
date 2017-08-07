@@ -182,7 +182,7 @@
 			light := args[16]
 			time := args[17]
 
-			LatestLocation, err := String(t.cl.GetCargoLocation(stub, []string{ContractNo}))
+			LatestLocation, err := t.cl.GetCargoLocation(stub, []string{ContractNo})
 
 			if LatestLocation == nil {
 				myLoggerIOT.Debugf("-------------------------------------------------------------------")
@@ -234,7 +234,7 @@
 				myLoggerIOT.Debugf("New Location Found!")
 				myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 
-				iotJSON = t.iot.GetIOTdata(ContractNo, iothub)
+				iotJSON = t.iot.GetIOTdata(stub, []string{ContractNo,iothub})
 				if iotdata.iothub == "" && iotdata.deviceid == "" {
 					// Insert a row
 					ok, err := stub.InsertRow("IOTTable", shim.Row{
