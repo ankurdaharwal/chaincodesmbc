@@ -1,244 +1,243 @@
-		package main
+package main
 
-		import (
-			"encoding/json"
-			"errors"
-			//"fmt"
-			"github.com/hyperledger/fabric/core/chaincode/shim"
-			"github.com/op/go-logging"
-		)
+import (
+	"encoding/json"
+	"errors"
+	//"fmt"
+	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/op/go-logging"
+)
 
-		//type ServicesChaincode struct {
-		//}
+//type ServicesChaincode struct {
+//}
 
-		type IOT struct {
-			drr DRR
-			cl  CL
+type IOT struct {
+	drr DRR
+	cl  CL
+}
+
+type Contract struct {
+	ContractNo string `json:"contractNo"`
+}
+
+type EVENTJSON struct {
+	ContractNo  string `json:"contractNo"`
+	Iothub      string `json:"iothub"`
+	Deviceid    string `json:"deviceid"`
+	Time        string `json:"time"`
+	AmbientTemp string `json:"ambientTemp"`
+	ObjectTemp  string `json:"objectTemp"`
+	Email       string `json:"Email"`
+}
+
+type IOTJSON struct {
+	Iothub      string `json:"iothub"`
+	Deviceid    string `json:"deviceid"`
+	AmbientTemp string `json:"ambientTemp"`
+	ObjectTemp  string `json:"objectTemp"`
+	Humidity    string `json:"humidity"`
+	Pressure    string `json:"pressure"`
+	Altitude    string `json:"altitude"`
+	AccelX      string `json:"accelX"`
+	AccelY      string `json:"accelY"`
+	AccelZ      string `json:"accelZ"`
+	GyroX       string `json:"gyroX"`
+	GyroY       string `json:"gyroY"`
+	GyroZ       string `json:"gyroZ"`
+	MagX        string `json:"magX"`
+	MagY        string `json:"magY"`
+	MagZ        string `json:"magZ"`
+	Light       string `json:"light"`
+	Time        string `json:"time"`
+}
+
+var myLoggerIOT = logging.MustGetLogger("IOT-Services")
+
+func (t *IOT) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	// Check if table already exists
+	_, err := stub.GetTable("IOTTable")
+	if err == nil {
+		// Table already exists; do not recreate
+		return nil, nil
+	}
+
+	// Create IOT Table
+	err = stub.CreateTable("IOTTable", []*shim.ColumnDefinition{
+		&shim.ColumnDefinition{Name: "Type", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "ContractNoLocation", Type: shim.ColumnDefinition_STRING, Key: true},
+		&shim.ColumnDefinition{Name: "ContractNo", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "iothub", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "deviceid", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "ambientTemp", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "objectTemp", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "humidity", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "pressure", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "altitude", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "accelX", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "accelY", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "accelZ", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "gyroX", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "gyroY", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "gyroZ", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "magX", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "magY", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "magZ", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "light", Type: shim.ColumnDefinition_STRING, Key: false},
+		&shim.ColumnDefinition{Name: "time", Type: shim.ColumnDefinition_STRING, Key: false},
+	})
+	if err != nil {
+		return nil, errors.New("Failed creating IOTTable.")
+	}
+	return nil, nil
+}
+
+/*
+	func (t *IOT) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+
+		myLogger.Debugf("-------------------------------------------------------------------")
+		myLogger.Debugf("Function : ", function)
+		myLogger.Debugf("args : ", args)
+
+		if function == "SubmitDoc" {
+			return t.SubmitDoc(stub, args)
 		}
+		return nil, errors.New("Received unknown function invocation")
+	}
+*/
 
-		type Contract struct {
-			ContractNo string `json:"contractNo"`
-		}
+//SubmitDoc () inserts a new row in the table
+func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
-		type EVENTJSON struct {
-			ContractNo  string `json:"contractNo"`
-			Iothub      string `json:"iothub"`
-			Deviceid    string `json:"deviceid"`
-			Time        string `json:"time"`
-			AmbientTemp string `json:"ambientTemp"`
-			ObjectTemp  string `json:"objectTemp"`
-			Email 	    string `json:"Email"`
-		}
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Submit IOT Data")
+	myLoggerIOT.Debugf("args : ", args)
 
-		type IOTJSON struct {
-			Iothub      string `json:"iothub"`
-			Deviceid    string `json:"deviceid"`
-			AmbientTemp string `json:"ambientTemp"`
-			ObjectTemp  string `json:"objectTemp"`
-			Humidity    string `json:"humidity"`
-			Pressure    string `json:"pressure"`
-			Altitude    string `json:"altitude"`
-			AccelX      string `json:"accelX"`
-			AccelY      string `json:"accelY"`
-			AccelZ      string `json:"accelZ"`
-			GyroX       string `json:"gyroX"`
-			GyroY       string `json:"gyroY"`
-			GyroZ       string `json:"gyroZ"`
-			MagX        string `json:"magX"`
-			MagY        string `json:"magY"`
-			MagZ        string `json:"magZ"`
-			Light       string `json:"light"`
-			Time        string `json:"time"`
-		}
+	if len(args) != 18 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 18")
+	}
 
-		var myLoggerIOT = logging.MustGetLogger("IOT-Services")
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("No. of Arguments Passed")
 
-		func (t *IOT) Init(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-			// Check if table already exists
-			_, err := stub.GetTable("IOTTable")
-			if err == nil {
-				// Table already exists; do not recreate
-				return nil, nil
-			}
+	deviceid := args[1]
 
-			// Create IOT Table
-			err = stub.CreateTable("IOTTable", []*shim.ColumnDefinition{
-				&shim.ColumnDefinition{Name: "Type", Type: shim.ColumnDefinition_STRING, Key: true},
-				&shim.ColumnDefinition{Name: "ContractNoLocation", Type: shim.ColumnDefinition_STRING, Key: true},
-				&shim.ColumnDefinition{Name: "ContractNo", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "iothub", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "deviceid", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "ambientTemp", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "objectTemp", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "humidity", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "pressure", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "altitude", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "accelX", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "accelY", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "accelZ", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "gyroX", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "gyroY", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "gyroZ", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "magX", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "magY", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "magZ", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "light", Type: shim.ColumnDefinition_STRING, Key: false},
-				&shim.ColumnDefinition{Name: "time", Type: shim.ColumnDefinition_STRING, Key: false},
-			})
-			if err != nil {
-				return nil, errors.New("Failed creating IOTTable.")
-			}
-			return nil, nil
-		}
-		/*
-		func (t *IOT) Invoke(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	// to get contract id from device id
+	var contractid Contract
 
-			myLogger.Debugf("-------------------------------------------------------------------")
-			myLogger.Debugf("Function : ", function)
-			myLogger.Debugf("args : ", args)
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Just Before GetContractNo")
 
-			if function == "SubmitDoc" {
-				return t.SubmitDoc(stub, args)
-			}
-			return nil, errors.New("Received unknown function invocation")
-		}
-		*/
+	b1, err := t.drr.GetContractNo(stub, []string{deviceid})
 
-		//SubmitDoc () inserts a new row in the table
-		func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetContractNo", err)
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Submit IOT Data")
-			myLoggerIOT.Debugf("args : ", args)
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Just after GetContractNo")
 
-			if len(args) != 18 {
-				return nil, errors.New("Incorrect number of arguments. Expecting 18")
-			}
+	contractid.ContractNo = string(b1)
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("No. of Arguments Passed")
+	if b1 == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Before B1 = NIL")
+		return nil, errors.New("ContractNo Not Found")
+	}
 
-			deviceid := args[1]
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetContractNo : ", b1)
 
-			// to get contract id from device id
-			var contractid Contract
+	e1, err := t.drr.GetEmailId(stub, []string{deviceid})
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Just Before GetContractNo")
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetEmailId", err)
 
-			b1, err := t.drr.GetContractNo(stub, []string{deviceid})
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Just after GetEmailId")
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Error Just after GetContractNo", err)
+	if e1 == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Before e1 = NIL")
+		return nil, errors.New("Email ID Not Found")
+	}
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Just after GetContractNo")
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetEmailId : ", e1)
 
-			contractid.ContractNo = string(b1)
+	ContractNo := contractid.ContractNo
+	Email := string(e1)
+	iothub := args[0]
+	ambientTemp := args[2]
+	objectTemp := args[3]
+	humidity := args[4]
+	pressure := args[5]
+	altitude := args[6]
+	accelX := args[7]
+	accelY := args[8]
+	accelZ := args[9]
+	gyroX := args[10]
+	gyroY := args[11]
+	gyroZ := args[12]
+	magX := args[13]
+	magY := args[14]
+	magZ := args[15]
+	light := args[16]
+	time := args[17]
 
-			if b1 == nil {
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("Before B1 = NIL")
-				return nil, errors.New("ContractNo Not Found")
-			}
+	LatestLocation, err := t.cl.GetCargoLocation(stub, []string{ContractNo})
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("GetContractNo : ", b1)
+	if LatestLocation == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		return nil, errors.New("CargoLocation Not Found!")
+	}
 
-			e1, err := t.drr.GetEmailId(stub, []string{deviceid})
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Error Just after GetEmailId", err)
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetCargoLocation : ", LatestLocation)
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Just after GetEmailId")
+	var CargoLocation string
 
-			if e1 == nil {
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("Before e1 = NIL")
-				return nil, errors.New("Email ID Not Found")
-			}
+	var iotdata IOTJSON
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("GetEmailId : ", e1)
+	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
 
-			ContractNo := contractid.ContractNo
-			Email := string(e1)
-			iothub := args[0]
-			ambientTemp := args[2]
-			objectTemp := args[3]
-			humidity := args[4]
-			pressure := args[5]
-			altitude := args[6]
-			accelX := args[7]
-			accelY := args[8]
-			accelZ := args[9]
-			gyroX := args[10]
-			gyroY := args[11]
-			gyroZ := args[12]
-			magX := args[13]
-			magY := args[14]
-			magZ := args[15]
-			light := args[16]
-			time := args[17]
+	if !validIOTHub[iothub] {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Cargo Location Not Found!")
+		return nil, errors.New("Cargo Location Not Found!")
+	}
 
-			LatestLocation, err := t.cl.GetCargoLocation(stub, []string{ContractNo})
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Found! ", iothub)
 
-			if LatestLocation == nil {
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				return nil, errors.New("CargoLocation Not Found!")
-			}
+	if iothub == "ipad01" {
+		CargoLocation = "Ex FWD"
+	} else if iothub == "ipad02" {
+		CargoLocation = "Ex Ship"
+	} else if iothub == "ipad03" {
+		CargoLocation = "Shipping"
+	}
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("GetCargoLocation : ", LatestLocation)
+	ContractNoLocation := ContractNo + iothub
 
-			var CargoLocation string
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
-			var iotdata IOTJSON
+	if CargoLocation != String(LatestLocation) {
 
-			validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("New Location Found!")
+		myLoggerIOT.Debugf("Checking for Existing IOT Data!")
 
-			if !validIOTHub[iothub] {
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("Cargo Location Not Found!")
-				return nil, errors.New("Cargo Location Not Found!")
-			}
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Cargo Location Found! ", iothub)
-
-
-			if iothub == "ipad01" {
-				CargoLocation = "Ex FWD"
-			} else if iothub == "ipad02" {
-				CargoLocation = "Ex Ship"
-			} else if iothub == "ipad03" {
-				CargoLocation = "Shipping"
-			}
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
-
-			ContractNoLocation := ContractNo + iothub
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
-
-
-			if CargoLocation != LatestLocation {
-
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("New Location Found!")
-				myLoggerIOT.Debugf("Checking for Existing IOT Data!")
-
-				iotJSON = t.iot.GetIOTdata(stub, []string{ContractNo,iothub})
-				if iotdata.iothub == "" && iotdata.deviceid == "" {
-					// Insert a row
-					ok, err := stub.InsertRow("IOTTable", shim.Row{
-					Columns: []*shim.Column{
+		iotJSON = t.iot.GetIOTdata(stub, []string{ContractNo, iothub})
+		if iotdata.iothub == "" && iotdata.deviceid == "" {
+			// Insert a row
+			ok, err := stub.InsertRow("IOTTable", shim.Row{
+				Columns: []*shim.Column{
 					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
@@ -261,21 +260,21 @@
 					&shim.Column{Value: &shim.Column_String_{String_: light}},
 					&shim.Column{Value: &shim.Column_String_{String_: time}},
 				}})
-					
-				if !ok && err == nil {
-					return nil, errors.New("Document already exists in IOTTable.")
-				}
 
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("After Row Insertion : ", ok)
-			}else{
-					// Replace a row for Defect I020
-					ok, err := stub.ReplaceRow("IOTTable", shim.Row{
-					Columns: []*shim.Column{
+			if !ok && err == nil {
+				return nil, errors.New("Document already exists in IOTTable.")
+			}
+
+			myLoggerIOT.Debugf("-------------------------------------------------------------------")
+			myLoggerIOT.Debugf("After Row Insertion : ", ok)
+		} else {
+			// Replace a row for Defect I020
+			ok, err := stub.ReplaceRow("IOTTable", shim.Row{
+				Columns: []*shim.Column{
 					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
-					&shim.Column{Value: &shim.Column_String_{String_: iothub}},	
+					&shim.Column{Value: &shim.Column_String_{String_: iothub}},
 					&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
 					&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
 					&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
@@ -294,194 +293,191 @@
 					&shim.Column{Value: &shim.Column_String_{String_: light}},
 					&shim.Column{Value: &shim.Column_String_{String_: time}},
 				}})
-					
-				if !ok && err == nil {
-					return nil, errors.New("Document already exists in IOTTable.")
-				}
 
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("After Row Insertion : ", ok)
-			}
-		}	
-
-
-			//function to get cargolocation based on iothub
-
-
-			toSend := make([]string, 3)
-			toSend[0] = string(ContractNo)
-			toSend[1] = string(CargoLocation)
-			toSend[2] = string(time)
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
-			myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
-			myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
-
-			clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
-			if clErr != nil {
-				return nil, clErr
+			if !ok && err == nil {
+				return nil, errors.New("Document already exists in IOTTable.")
 			}
 
 			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
-			myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
-
-			var eventJSON EVENTJSON
-
-			eventJSON.ContractNo = ContractNo
-			eventJSON.Iothub = iothub
-			eventJSON.Deviceid = deviceid
-			eventJSON.Time = time
-			eventJSON.AmbientTemp = ambientTemp
-			eventJSON.ObjectTemp = objectTemp
-			eventJSON.Email = Email
-
-			myLoggerIOT.Debugf("eventJSON", eventJSON)
-			jsonEvent, err := json.Marshal(eventJSON)
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Error in Marshalling : ",err)
-
-			if err != nil {
-				return nil, err
-			}
-			myLoggerIOT.Debugf("Event Data : ", string(jsonEvent))
-
-			err = stub.SetEvent("IOTSubmitEvent", jsonEvent)
-			if err != nil {
-				return nil, err
-			}
-
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("After Set Event: ", clupdate)
-			myLoggerIOT.Debugf("Error After Set Event: ", clErr)
-
-			return nil, err
+			myLoggerIOT.Debugf("After Row Insertion : ", ok)
 		}
+	}
 
+	//function to get cargolocation based on iothub
 
-		/*func (t *IOT) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
-			if function == "GetIOTdata" {
-				return t.GetIOTdata(stub, args)
-			}
-			return nil, errors.New("Received unknown function invocation")
-		}
-		*/
-		func (t *IOT) GetIOTdata(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	toSend := make([]string, 3)
+	toSend[0] = string(ContractNo)
+	toSend[1] = string(CargoLocation)
+	toSend[2] = string(time)
 
-			if len(args) != 2 {
-				return nil, errors.New("Incorrect number of arguments. Expecting 2.")
-			}
-			ContractNo := args[0]
-			Location := args[1]
-			myLoggerIOT.Debugf("Contract Number : ", ContractNo)
-			myLoggerIOT.Debugf("Location : ", Location)
-			ContractNoLocation := ContractNo + Location
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
+	myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
+	myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
 
-			// Get the row pertaining to this UID
-			var columns []shim.Column
-			col1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
-			columns = append(columns, col1)
-			col2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
-			columns = append(columns, col2)
+	clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
+	if clErr != nil {
+		return nil, clErr
+	}
 
-			row, err := stub.GetRow("IOTTable", columns)
-			if err != nil {
-				return nil, errors.New("Error: Failed retrieving document!")
-			}
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
+	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
 
-			var iotJSON IOTJSON
+	var eventJSON EVENTJSON
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Matched Row : ", len(row.Columns))
+	eventJSON.ContractNo = ContractNo
+	eventJSON.Iothub = iothub
+	eventJSON.Deviceid = deviceid
+	eventJSON.Time = time
+	eventJSON.AmbientTemp = ambientTemp
+	eventJSON.ObjectTemp = objectTemp
+	eventJSON.Email = Email
 
-			// GetRows returns empty message if key does not exist
-			if len(row.Columns) == 0 {
+	myLoggerIOT.Debugf("eventJSON", eventJSON)
+	jsonEvent, err := json.Marshal(eventJSON)
 
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf(" Contract No Not Found! ")
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error in Marshalling : ", err)
 
-				iotJSON.Iothub = ""
-				iotJSON.Deviceid = ""
-				iotJSON.AmbientTemp = ""
-				iotJSON.ObjectTemp = ""
-				iotJSON.Humidity = ""
-				iotJSON.Pressure = ""
-				iotJSON.Altitude = ""
-				iotJSON.AccelX = ""
-				iotJSON.AccelY = ""
-				iotJSON.AccelZ = ""
-				iotJSON.GyroX = ""
-				iotJSON.GyroY = ""
-				iotJSON.GyroZ = ""
-				iotJSON.MagX = ""
-				iotJSON.MagY = ""
-				iotJSON.MagZ = ""
-				iotJSON.Light = ""
-				iotJSON.Time = ""
+	if err != nil {
+		return nil, err
+	}
+	myLoggerIOT.Debugf("Event Data : ", string(jsonEvent))
 
-			} else {
+	err = stub.SetEvent("IOTSubmitEvent", jsonEvent)
+	if err != nil {
+		return nil, err
+	}
 
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf("Before Retrieving Data")
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("After Set Event: ", clupdate)
+	myLoggerIOT.Debugf("Error After Set Event: ", clErr)
 
-				iotJSON.Iothub = row.Columns[3].GetString_()
-				iotJSON.Deviceid = row.Columns[4].GetString_()
-				iotJSON.AmbientTemp = row.Columns[5].GetString_()
-				iotJSON.ObjectTemp = row.Columns[6].GetString_()
-				iotJSON.Humidity = row.Columns[7].GetString_()
-				iotJSON.Pressure = row.Columns[8].GetString_()
-				iotJSON.Altitude = row.Columns[9].GetString_()
-				iotJSON.AccelX = row.Columns[10].GetString_()
-				iotJSON.AccelY = row.Columns[11].GetString_()
-				iotJSON.AccelZ = row.Columns[12].GetString_()
-				iotJSON.GyroX = row.Columns[13].GetString_()
-				iotJSON.GyroY = row.Columns[14].GetString_()
-				iotJSON.GyroZ = row.Columns[15].GetString_()
-				iotJSON.MagX = row.Columns[16].GetString_()
-				iotJSON.MagY = row.Columns[17].GetString_()
-				iotJSON.MagZ = row.Columns[18].GetString_()
-				iotJSON.Light = row.Columns[19].GetString_()
-				iotJSON.Time = row.Columns[20].GetString_()
+	return nil, err
+}
 
-				myLoggerIOT.Debugf("-------------------------------------------------------------------")
-				myLoggerIOT.Debugf(iotJSON.Iothub)
-				myLoggerIOT.Debugf(iotJSON.Deviceid)
-				myLoggerIOT.Debugf(iotJSON.AmbientTemp)
-				myLoggerIOT.Debugf(iotJSON.ObjectTemp)
-				myLoggerIOT.Debugf(iotJSON.Humidity)
-				myLoggerIOT.Debugf(iotJSON.Pressure)
-				myLoggerIOT.Debugf(iotJSON.Altitude)
-				myLoggerIOT.Debugf(iotJSON.AccelX)
-				myLoggerIOT.Debugf(iotJSON.AccelY)
-				myLoggerIOT.Debugf(iotJSON.AccelZ)
-				myLoggerIOT.Debugf(iotJSON.GyroX)
-				myLoggerIOT.Debugf(iotJSON.GyroY)
-				myLoggerIOT.Debugf(iotJSON.GyroZ)
-				myLoggerIOT.Debugf(iotJSON.MagX)
-				myLoggerIOT.Debugf(iotJSON.MagY)
-				myLoggerIOT.Debugf(iotJSON.MagZ)
-				myLoggerIOT.Debugf(iotJSON.Light)
-				myLoggerIOT.Debugf(iotJSON.Time)
-			}
-			myLoggerIOT.Debugf("iotJSON", iotJSON)
-			jsonIOT, err := json.Marshal(iotJSON)
+/*func (t *IOT) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
+	if function == "GetIOTdata" {
+		return t.GetIOTdata(stub, args)
+	}
+	return nil, errors.New("Received unknown function invocation")
+}
+*/
+func (t *IOT) GetIOTdata(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
-			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("Error in Marshalling : ",err)
+	if len(args) != 2 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2.")
+	}
+	ContractNo := args[0]
+	Location := args[1]
+	myLoggerIOT.Debugf("Contract Number : ", ContractNo)
+	myLoggerIOT.Debugf("Location : ", Location)
+	ContractNoLocation := ContractNo + Location
 
-			if err != nil {
-				return nil, err
-			}
-			myLoggerIOT.Debugf("IOT Data : ", string(jsonIOT))
-			return jsonIOT, nil
-		}
+	// Get the row pertaining to this UID
+	var columns []shim.Column
+	col1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
+	columns = append(columns, col1)
+	col2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
+	columns = append(columns, col2)
 
-		/*func main() {
-			err := shim.Start(new(ServicesChaincode))
-			if err != nil {
-				fmt.Printf("Error starting ServicesChaincode: %s", err)
-			}
-		}
-		*/
+	row, err := stub.GetRow("IOTTable", columns)
+	if err != nil {
+		return nil, errors.New("Error: Failed retrieving document!")
+	}
+
+	var iotJSON IOTJSON
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Matched Row : ", len(row.Columns))
+
+	// GetRows returns empty message if key does not exist
+	if len(row.Columns) == 0 {
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf(" Contract No Not Found! ")
+
+		iotJSON.Iothub = ""
+		iotJSON.Deviceid = ""
+		iotJSON.AmbientTemp = ""
+		iotJSON.ObjectTemp = ""
+		iotJSON.Humidity = ""
+		iotJSON.Pressure = ""
+		iotJSON.Altitude = ""
+		iotJSON.AccelX = ""
+		iotJSON.AccelY = ""
+		iotJSON.AccelZ = ""
+		iotJSON.GyroX = ""
+		iotJSON.GyroY = ""
+		iotJSON.GyroZ = ""
+		iotJSON.MagX = ""
+		iotJSON.MagY = ""
+		iotJSON.MagZ = ""
+		iotJSON.Light = ""
+		iotJSON.Time = ""
+
+	} else {
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Before Retrieving Data")
+
+		iotJSON.Iothub = row.Columns[3].GetString_()
+		iotJSON.Deviceid = row.Columns[4].GetString_()
+		iotJSON.AmbientTemp = row.Columns[5].GetString_()
+		iotJSON.ObjectTemp = row.Columns[6].GetString_()
+		iotJSON.Humidity = row.Columns[7].GetString_()
+		iotJSON.Pressure = row.Columns[8].GetString_()
+		iotJSON.Altitude = row.Columns[9].GetString_()
+		iotJSON.AccelX = row.Columns[10].GetString_()
+		iotJSON.AccelY = row.Columns[11].GetString_()
+		iotJSON.AccelZ = row.Columns[12].GetString_()
+		iotJSON.GyroX = row.Columns[13].GetString_()
+		iotJSON.GyroY = row.Columns[14].GetString_()
+		iotJSON.GyroZ = row.Columns[15].GetString_()
+		iotJSON.MagX = row.Columns[16].GetString_()
+		iotJSON.MagY = row.Columns[17].GetString_()
+		iotJSON.MagZ = row.Columns[18].GetString_()
+		iotJSON.Light = row.Columns[19].GetString_()
+		iotJSON.Time = row.Columns[20].GetString_()
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf(iotJSON.Iothub)
+		myLoggerIOT.Debugf(iotJSON.Deviceid)
+		myLoggerIOT.Debugf(iotJSON.AmbientTemp)
+		myLoggerIOT.Debugf(iotJSON.ObjectTemp)
+		myLoggerIOT.Debugf(iotJSON.Humidity)
+		myLoggerIOT.Debugf(iotJSON.Pressure)
+		myLoggerIOT.Debugf(iotJSON.Altitude)
+		myLoggerIOT.Debugf(iotJSON.AccelX)
+		myLoggerIOT.Debugf(iotJSON.AccelY)
+		myLoggerIOT.Debugf(iotJSON.AccelZ)
+		myLoggerIOT.Debugf(iotJSON.GyroX)
+		myLoggerIOT.Debugf(iotJSON.GyroY)
+		myLoggerIOT.Debugf(iotJSON.GyroZ)
+		myLoggerIOT.Debugf(iotJSON.MagX)
+		myLoggerIOT.Debugf(iotJSON.MagY)
+		myLoggerIOT.Debugf(iotJSON.MagZ)
+		myLoggerIOT.Debugf(iotJSON.Light)
+		myLoggerIOT.Debugf(iotJSON.Time)
+	}
+	myLoggerIOT.Debugf("iotJSON", iotJSON)
+	jsonIOT, err := json.Marshal(iotJSON)
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error in Marshalling : ", err)
+
+	if err != nil {
+		return nil, err
+	}
+	myLoggerIOT.Debugf("IOT Data : ", string(jsonIOT))
+	return jsonIOT, nil
+}
+
+/*func main() {
+	err := shim.Start(new(ServicesChaincode))
+	if err != nil {
+		fmt.Printf("Error starting ServicesChaincode: %s", err)
+	}
+}
+*/
