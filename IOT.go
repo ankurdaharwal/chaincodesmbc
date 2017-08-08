@@ -366,7 +366,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("After Set Event: ", clupdate)
 	myLoggerIOT.Debugf("Error After Set Event: ", clErr)
-*/
+
 	return nil, err
 }
 
