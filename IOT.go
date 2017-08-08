@@ -226,7 +226,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
 		
-	/*if CargoLocation != string(LatestLocation) {
+	//if CargoLocation != string(LatestLocation) {
 
 		myLoggerIOT.Debugf("-------------------------------------------------------------------")
 		myLoggerIOT.Debugf("New Location Found!")
@@ -314,7 +314,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			myLoggerIOT.Debugf("-------------------------------------------------------------------")
 			myLoggerIOT.Debugf("After Row Insertion : ", ok)
 		}
-	}
+	//}
 
 	//function to get cargolocation based on iothub
 
