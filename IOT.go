@@ -141,7 +141,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	}
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("GetContractNo : ", b1)
+	myLoggerIOT.Debugf("GetContractNo : ", string(b1))
 
 	e1, err := t.drr.GetEmailId(stub, []string{deviceid})
 
@@ -158,7 +158,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	}
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("GetEmailId : ", e1)
+	myLoggerIOT.Debugf("GetEmailId : ", string(e1))
 
 	ContractNo := contractid.ContractNo
 	Email := string(e1)
@@ -191,7 +191,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("GetCargoLocation : ", LatestLocation)
+	myLoggerIOT.Debugf("GetCargoLocation : ", string(LatestLocation))
 	
 	ContractNoLocation := ContractNo + iothub
 
@@ -254,6 +254,11 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		CargoLocation = "Shipping"
 	}
 
+	if string(CargoLocation) == string(LatestLocation) {
+		myLoggerIOT.Debugf("------------------------------------------------------")
+		myLoggerIOT.Debugf("Cargo Location Matched ", string(LatestLocation))
+	}
+	
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
 
