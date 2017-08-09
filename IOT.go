@@ -180,6 +180,19 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	light := args[16]
 	time := args[17]
 
+	LatestLocation, err := t.cl.GetCargoLocation(stub, []string{ContractNo})
+
+	if LatestLocation == nil {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		return nil, errors.New("CargoLocation Not Found!")
+	}
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Error Just after GetCargoLocation", err)
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("GetCargoLocation : ", LatestLocation)
+	
 	ContractNoLocation := ContractNo + iothub
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
