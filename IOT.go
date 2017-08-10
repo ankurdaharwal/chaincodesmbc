@@ -218,6 +218,29 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		CargoLocation = "Shipping"
 	}
 
+	toSend := make([]string, 3)
+	toSend[0] = string(ContractNo)
+	toSend[1] = string(CargoLocation)
+	toSend[2] = string(time)
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
+	myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
+	myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
+
+	clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
+	if clErr != nil {
+		return nil, clErr
+	}
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
+	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Matching Current Location with New Location : ", string(LatestLocation))
+	myLoggerIOT.Debugf(", ",string(CargoLocation))
+	
 	if string(CargoLocation) == string(LatestLocation) {
 		myLoggerIOT.Debugf("------------------------------------------------------")
 		myLoggerIOT.Debugf("Cargo Location Matched ", string(LatestLocation))
@@ -261,26 +284,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("After Row Insertion : ", ok)
-
-	toSend := make([]string, 3)
-	toSend[0] = string(ContractNo)
-	toSend[1] = string(CargoLocation)
-	toSend[2] = string(time)
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
-	myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
-	myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
-
-	clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
-	if clErr != nil {
-		return nil, clErr
-	}
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
-	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
-
+	
 	var eventJSON EVENTJSON
 
 	eventJSON.ContractNo = ContractNo
