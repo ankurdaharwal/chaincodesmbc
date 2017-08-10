@@ -280,7 +280,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			}
 
 			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("After Row Updation : ", ok)
+			myLoggerIOT.Debugf("After Row Updation : ", ok1)
 			
 		}else{
 			// Insert a row
@@ -314,7 +314,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			}
 
 			myLoggerIOT.Debugf("-------------------------------------------------------------------")
-			myLoggerIOT.Debugf("After Row Insertion : ", ok)
+			myLoggerIOT.Debugf("After Row Insertion : ", ok2)
 			
 		}
 
