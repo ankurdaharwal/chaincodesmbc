@@ -216,8 +216,110 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		CargoLocation = "Ex Ship"
 	} else if iothub == "ipad03" {
 		CargoLocation = "Shipping"
-	}
+	}	
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Matching Current Location with New Location : ", string(LatestLocation))
+	myLoggerIOT.Debugf(", ",string(CargoLocation))
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
+	if string(CargoLocation) != string(LatestLocation) {
+		
+		myLoggerIOT.Debugf("------------------------------------------------------")
+		myLoggerIOT.Debugf("New Cargo Location Found : ", string(CargoLocation))
+
+		var columns []shim.Column
+		col1 := shim.Column{Value: &shim.Column_String_{String_: "IOT"}}
+		columns = append(columns, col1)
+		col2 := shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}}
+		columns = append(columns, col2)
+
+		row, err := stub.GetRow("IOTTable", columns)
+		if err != nil {
+			return nil, errors.New("Error: Failed retrieving document!")
+		}
+
+		// var iotKey := string( []byte(row.Columns[2].GetString_()) )
+
+		// if iotKey != nil{
+
+		if len(row.Columns) == 0 {
+			// Replace the row
+			ok1, err := stub.InsertRow("IOTTable", shim.Row{
+				Columns: []*shim.Column{
+					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
+					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
+					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
+					&shim.Column{Value: &shim.Column_String_{String_: iothub}},
+					&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
+					&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
+					&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
+					&shim.Column{Value: &shim.Column_String_{String_: humidity}},
+					&shim.Column{Value: &shim.Column_String_{String_: pressure}},
+					&shim.Column{Value: &shim.Column_String_{String_: altitude}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelX}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelY}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroX}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroY}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: magX}},
+					&shim.Column{Value: &shim.Column_String_{String_: magY}},
+					&shim.Column{Value: &shim.Column_String_{String_: magZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: light}},
+					&shim.Column{Value: &shim.Column_String_{String_: time}},
+				}})
+
+			if !ok1 && err == nil {
+				return nil, errors.New("Document already exists in IOTTable.")
+			}
+
+			myLoggerIOT.Debugf("-------------------------------------------------------------------")
+			myLoggerIOT.Debugf("After Row Updation : ", ok)
+			
+		}else{
+			// Insert a row
+			ok2, err := stub.ReplaceRow("IOTTable", shim.Row{
+				Columns: []*shim.Column{
+					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
+					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
+					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
+					&shim.Column{Value: &shim.Column_String_{String_: iothub}},
+					&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
+					&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
+					&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
+					&shim.Column{Value: &shim.Column_String_{String_: humidity}},
+					&shim.Column{Value: &shim.Column_String_{String_: pressure}},
+					&shim.Column{Value: &shim.Column_String_{String_: altitude}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelX}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelY}},
+					&shim.Column{Value: &shim.Column_String_{String_: accelZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroX}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroY}},
+					&shim.Column{Value: &shim.Column_String_{String_: gyroZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: magX}},
+					&shim.Column{Value: &shim.Column_String_{String_: magY}},
+					&shim.Column{Value: &shim.Column_String_{String_: magZ}},
+					&shim.Column{Value: &shim.Column_String_{String_: light}},
+					&shim.Column{Value: &shim.Column_String_{String_: time}},
+				}})
+
+			if !ok2 && err == nil {
+				return nil, errors.New("Document already exists in IOTTable.")
+			}
+
+			myLoggerIOT.Debugf("-------------------------------------------------------------------")
+			myLoggerIOT.Debugf("After Row Insertion : ", ok)
+			
+		}
+
+	}
+			
 	toSend := make([]string, 3)
 	toSend[0] = string(ContractNo)
 	toSend[1] = string(CargoLocation)
@@ -236,55 +338,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
 	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Matching Current Location with New Location : ", string(LatestLocation))
-	myLoggerIOT.Debugf(", ",string(CargoLocation))
-	
-	if string(CargoLocation) == string(LatestLocation) {
-		myLoggerIOT.Debugf("------------------------------------------------------")
-		myLoggerIOT.Debugf("Cargo Location Matched ", string(LatestLocation))
-	}
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
-	// Insert a row
-	ok, err := stub.InsertRow("IOTTable", shim.Row{
-		Columns: []*shim.Column{
-			&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
-			&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
-			&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
-			&shim.Column{Value: &shim.Column_String_{String_: iothub}},
-			&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
-			&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
-			&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
-			&shim.Column{Value: &shim.Column_String_{String_: humidity}},
-			&shim.Column{Value: &shim.Column_String_{String_: pressure}},
-			&shim.Column{Value: &shim.Column_String_{String_: altitude}},
-			&shim.Column{Value: &shim.Column_String_{String_: accelX}},
-			&shim.Column{Value: &shim.Column_String_{String_: accelY}},
-			&shim.Column{Value: &shim.Column_String_{String_: accelZ}},
-			&shim.Column{Value: &shim.Column_String_{String_: gyroX}},
-			&shim.Column{Value: &shim.Column_String_{String_: gyroY}},
-			&shim.Column{Value: &shim.Column_String_{String_: gyroZ}},
-			&shim.Column{Value: &shim.Column_String_{String_: magX}},
-			&shim.Column{Value: &shim.Column_String_{String_: magY}},
-			&shim.Column{Value: &shim.Column_String_{String_: magZ}},
-			&shim.Column{Value: &shim.Column_String_{String_: light}},
-			&shim.Column{Value: &shim.Column_String_{String_: time}},
-		}})
-
-	if !ok && err == nil {
-		return nil, errors.New("Document already exists in IOTTable.")
-	}
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("After Row Insertion : ", ok)
-	
 	var eventJSON EVENTJSON
 
 	eventJSON.ContractNo = ContractNo
