@@ -195,6 +195,37 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	
 	ContractNoLocation := ContractNo + iothub
 
+		//function to get cargolocation based on iothub
+
+	var CargoLocation string
+
+	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
+
+	if !validIOTHub[iothub] {
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Cargo Location Not Found!")
+		return nil, errors.New("Cargo Location Not Found!")
+	}
+
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
+
+	if iothub == "ipad01" {
+		CargoLocation = "Ex FWD"
+	} else if iothub == "ipad02" {
+		CargoLocation = "Ex Ship"
+	} else if iothub == "ipad03" {
+		CargoLocation = "Shipping"
+	}
+
+	if string(CargoLocation) == string(LatestLocation) {
+		myLoggerIOT.Debugf("------------------------------------------------------")
+		myLoggerIOT.Debugf("Cargo Location Matched ", string(LatestLocation))
+	}
+	
+	myLoggerIOT.Debugf("-------------------------------------------------------------------")
+	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
+	
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("ContractNoLocation : ", ContractNoLocation)
 
@@ -230,37 +261,6 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("After Row Insertion : ", ok)
-
-	//function to get cargolocation based on iothub
-
-	var CargoLocation string
-
-	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
-
-	if !validIOTHub[iothub] {
-		myLoggerIOT.Debugf("-------------------------------------------------------------------")
-		myLoggerIOT.Debugf("Cargo Location Not Found!")
-		return nil, errors.New("Cargo Location Not Found!")
-	}
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
-
-	if iothub == "ipad01" {
-		CargoLocation = "Ex FWD"
-	} else if iothub == "ipad02" {
-		CargoLocation = "Ex Ship"
-	} else if iothub == "ipad03" {
-		CargoLocation = "Shipping"
-	}
-
-	if string(CargoLocation) == string(LatestLocation) {
-		myLoggerIOT.Debugf("------------------------------------------------------")
-		myLoggerIOT.Debugf("Cargo Location Matched ", string(LatestLocation))
-	}
-	
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Set : ", CargoLocation)
 
 	toSend := make([]string, 3)
 	toSend[0] = string(ContractNo)
