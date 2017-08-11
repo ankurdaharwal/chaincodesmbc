@@ -317,58 +317,57 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 			myLoggerIOT.Debugf("After Row Insertion : ", ok2)
 			
 		}
-
-	}
 			
-	toSend := make([]string, 3)
-	toSend[0] = string(ContractNo)
-	toSend[1] = string(CargoLocation)
-	toSend[2] = string(time)
+		toSend := make([]string, 3)
+		toSend[0] = string(ContractNo)
+		toSend[1] = string(CargoLocation)
+		toSend[2] = string(time)
 
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
-	myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
-	myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Before Update Cargo Location (Contract No) : ", toSend[0])
+		myLoggerIOT.Debugf("Before Update Cargo Location (CargoLocation) : ", toSend[1])
+		myLoggerIOT.Debugf("Before Update Cargo Location (Time) : ", toSend[2])
 
-	clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
-	if clErr != nil {
-		return nil, clErr
+		clupdate, clErr := t.cl.UpdateCargoLocation(stub, toSend)
+		if clErr != nil {
+			return nil, clErr
+		}
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
+		myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
+
+		var eventJSON EVENTJSON
+
+		eventJSON.ContractNo = ContractNo
+		eventJSON.Iothub = iothub
+		eventJSON.Deviceid = deviceid
+		eventJSON.Time = time
+		eventJSON.AmbientTemp = ambientTemp
+		eventJSON.ObjectTemp = objectTemp
+		eventJSON.Email = Email
+
+		myLoggerIOT.Debugf("eventJSON", eventJSON)
+		jsonEvent, err := json.Marshal(eventJSON)
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("Error in Marshalling : ",err)
+
+		if err != nil {
+			return nil, err
+		}
+		myLoggerIOT.Debugf("Event Data : ", string(jsonEvent))
+
+		err = stub.SetEvent("IOTSubmitEvent", jsonEvent)
+		if err != nil {
+			return nil, err
+		}
+
+		myLoggerIOT.Debugf("-------------------------------------------------------------------")
+		myLoggerIOT.Debugf("After Set Event: ", clupdate)
+		myLoggerIOT.Debugf("Error After Set Event: ", clErr)
+
 	}
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("After Update Cargo Location (Contract No) : ", clupdate)
-	myLoggerIOT.Debugf("Error After Update Cargo Location (Contract No) : ", clErr)
-
-	var eventJSON EVENTJSON
-
-	eventJSON.ContractNo = ContractNo
-	eventJSON.Iothub = iothub
-	eventJSON.Deviceid = deviceid
-	eventJSON.Time = time
-	eventJSON.AmbientTemp = ambientTemp
-	eventJSON.ObjectTemp = objectTemp
-	eventJSON.Email = Email
-
-	myLoggerIOT.Debugf("eventJSON", eventJSON)
-	jsonEvent, err := json.Marshal(eventJSON)
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Error in Marshalling : ",err)
-
-	if err != nil {
-		return nil, err
-	}
-	myLoggerIOT.Debugf("Event Data : ", string(jsonEvent))
-
-	err = stub.SetEvent("IOTSubmitEvent", jsonEvent)
-	if err != nil {
-		return nil, err
-	}
-
-	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("After Set Event: ", clupdate)
-	myLoggerIOT.Debugf("Error After Set Event: ", clErr)
-
 	return nil, err
 }
 
