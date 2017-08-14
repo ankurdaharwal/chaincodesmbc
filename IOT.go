@@ -22,8 +22,8 @@ type Contract struct {
 
 type EVENTJSON struct {
 	ContractNo  string `json:"contractNo"`
-	Iothub      string `json:"iotHub"`
-	Deviceid    string `json:"deviceId"`
+	IotHub      string `json:"iotHub"`
+	DeviceId    string `json:"deviceId"`
 	Time        string `json:"time"`
 	AmbientTemp string `json:"ambientTemp"`
 	ObjectTemp  string `json:"objectTemp"`
@@ -116,7 +116,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("No. of Arguments Passed")
 
-	deviceid := args[1]
+	deviceId := args[1]
 
 	// to get contract id from device id
 	var contractid Contract
@@ -124,7 +124,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("Just Before GetContractNo")
 
-	b1, err := t.drr.GetContractNo(stub, []string{deviceid})
+	b1, err := t.drr.GetContractNo(stub, []string{deviceId})
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("Error Just after GetContractNo", err)
@@ -143,7 +143,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("GetContractNo : ", string(b1))
 
-	e1, err := t.drr.GetEmailId(stub, []string{deviceid})
+	e1, err := t.drr.GetEmailId(stub, []string{deviceId})
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("Error Just after GetEmailId", err)
@@ -162,7 +162,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 
 	ContractNo := contractid.ContractNo
 	Email := string(e1)
-	iothub := args[0]
+	iotHub := args[0]
 	ambientTemp := args[2]
 	objectTemp := args[3]
 	humidity := args[4]
@@ -193,7 +193,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("GetCargoLocation : ", string(LatestLocation))
 	
-	ContractNoLocation := ContractNo + iothub
+	ContractNoLocation := ContractNo + iotHub
 
 		//function to get cargolocation based on iothub
 
@@ -201,7 +201,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 
 	validIOTHub := map[string]bool{"ipad01": true, "ipad02": true, "ipad03": true}
 
-	if !validIOTHub[iothub] {
+	if !validIOTHub[iotHub] {
 		myLoggerIOT.Debugf("-------------------------------------------------------------------")
 		myLoggerIOT.Debugf("Cargo Location Not Found!")
 		return nil, errors.New("Cargo Location Not Found!")
@@ -210,11 +210,11 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
 	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
 
-	if iothub == "ipad01" {
+	if iotHub == "ipad01" {
 		CargoLocation = "Ex FWD"
-	} else if iothub == "ipad02" {
+	} else if iotHub == "ipad02" {
 		CargoLocation = "Ex Ship"
-	} else if iothub == "ipad03" {
+	} else if iotHub == "ipad03" {
 		CargoLocation = "Shipping"
 	}	
 	
@@ -255,8 +255,8 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
-					&shim.Column{Value: &shim.Column_String_{String_: iothub}},
-					&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
+					&shim.Column{Value: &shim.Column_String_{String_: iotHub}},
+					&shim.Column{Value: &shim.Column_String_{String_: deviceId}},
 					&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
 					&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
 					&shim.Column{Value: &shim.Column_String_{String_: humidity}},
@@ -289,8 +289,8 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 					&shim.Column{Value: &shim.Column_String_{String_: "IOT"}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNoLocation}},
 					&shim.Column{Value: &shim.Column_String_{String_: ContractNo}},
-					&shim.Column{Value: &shim.Column_String_{String_: iothub}},
-					&shim.Column{Value: &shim.Column_String_{String_: deviceid}},
+					&shim.Column{Value: &shim.Column_String_{String_: iotHub}},
+					&shim.Column{Value: &shim.Column_String_{String_: deviceId}},
 					&shim.Column{Value: &shim.Column_String_{String_: ambientTemp}},
 					&shim.Column{Value: &shim.Column_String_{String_: objectTemp}},
 					&shim.Column{Value: &shim.Column_String_{String_: humidity}},
@@ -340,8 +340,8 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 		var eventJSON EVENTJSON
 
 		eventJSON.ContractNo = ContractNo
-		eventJSON.IotHub = iothub
-		eventJSON.DeviceId = deviceid
+		eventJSON.IotHub = iotHub
+		eventJSON.DeviceId = deviceId
 		eventJSON.Time = time
 		eventJSON.AmbientTemp = ambientTemp
 		eventJSON.ObjectTemp = objectTemp
