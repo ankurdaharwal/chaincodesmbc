@@ -208,7 +208,7 @@ func (t *IOT) SubmitDoc(stub shim.ChaincodeStubInterface, args []string) ([]byte
 	}
 
 	myLoggerIOT.Debugf("-------------------------------------------------------------------")
-	myLoggerIOT.Debugf("Cargo Location Found!",iothub)
+	myLoggerIOT.Debugf("Cargo Location Found!",iotHub)
 
 	if iotHub == "ipad01" {
 		CargoLocation = "Ex FWD"
